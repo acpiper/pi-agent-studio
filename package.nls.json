@@ -5,6 +5,7 @@
   "pi.cmd.openModelsJson": "Pi: Open Models (JSON)",
   "pi.cmd.openSettings": "Pi: Open Settings",
   "pi.cmd.openInNewWindow": "Pi: Open in New Window",
+  "pi.cmd.reopenClosedEditor": "Pi: Reopen Closed Editor or Chat",
   "pi.cmd.openInSidebar": "Pi: Open in Sidebar",
   "pi.cmd.openInFolder": "Pi: Open Here",
   "pi.cmd.addSelectionToChat": "Add Selection to Pi Chat",

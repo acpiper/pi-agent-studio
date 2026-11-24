@@ -16,6 +16,7 @@ import {
 } from "./chat-session.ts";
 import { sessionStatusRegistry } from "../session-status-registry.ts";
 import { findPiColumn, findUnusedColumn } from "../webview-columns.ts";
+import { closedEditors } from "../reopen-closed-editor.ts";
 
 export { type ChatSessionUpdate } from "./chat-session.ts";
 
@@ -209,6 +210,7 @@ export async function openChatPanel(
       sessionStatusRegistry.remove(handle.sessionFile);
     }
     opts.tracker.removePanel(panelId);
+    closedEditors.addChat({ sessionFile: handle.sessionFile, cwd: opts.cwd });
     session.dispose();
   });
 

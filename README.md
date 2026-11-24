@@ -63,18 +63,19 @@ ovsx get johnny-zhao/pi-agent-studio
 
 ## Commands
 
-| Command                              | Keybinding    | Description                                                                                    |
-| ------------------------------------ | ------------- | ---------------------------------------------------------------------------------------------- |
-| `Pi: Open`                           | `Alt+Shift+P` | Open or focus the pi terminal beside the editor                                                |
-| `Pi: Open in New Window`             | —             | Open pi then move it to a new VS Code window                                                   |
-| `Pi: Open in Sidebar`                | —             | Open the chat UI in the **Pi Chat** sidebar view (starter screen until a session is started)   |
-| `Pi: Open Here`                      | —             | Open a pi terminal in the selected folder (via explorer context menu)                          |
-| `Pi: Upgrade Pi`                     | —             | Upgrade pi via `pi update` (falls back to the inferred package manager when offline)           |
-| `Pi: Open settings.json`             | —             | Open `~/.pi/agent/settings.json` in the editor (creates an empty `{}` if missing)              |
-| `Pi: Open models.json`               | —             | Open `~/.pi/agent/models.json` in the editor (creates an empty `{ providers: {} }` if missing) |
-| `Pi: Open Settings`                  | `Alt+Shift+,` | Open the full Settings panel (chat panel gear button and status bar item do the same)          |
-| `Pi: Generate Commit Message`        | —             | Generate an AI-powered Git commit message from staged changes using pi                         |
-| `Pi: Generate Commit Message - Stop` | —             | Abort an ongoing commit message generation                                                     |
+| Command                              | Keybinding         | Description                                                                                    |
+| ------------------------------------ | ------------------ | ---------------------------------------------------------------------------------------------- |
+| `Pi: Open`                           | `Alt+Shift+P`      | Open or focus the pi terminal beside the editor                                                |
+| `Pi: Open in New Window`             | —                  | Open pi then move it to a new VS Code window                                                   |
+| `Pi: Open in Sidebar`                | —                  | Open the chat UI in the **Pi Chat** sidebar view (starter screen until a session is started)   |
+| `Pi: Open Here`                      | —                  | Open a pi terminal in the selected folder (via explorer context menu)                          |
+| `Pi: Upgrade Pi`                     | —                  | Upgrade pi via `pi update` (falls back to the inferred package manager when offline)           |
+| `Pi: Open settings.json`             | —                  | Open `~/.pi/agent/settings.json` in the editor (creates an empty `{}` if missing)              |
+| `Pi: Open models.json`               | —                  | Open `~/.pi/agent/models.json` in the editor (creates an empty `{ providers: {} }` if missing) |
+| `Pi: Open Settings`                  | `Alt+Shift+,`      | Open the full Settings panel (chat panel gear button and status bar item do the same)          |
+| `Pi: Reopen Closed Editor or Chat`   | `Cmd/Ctrl+Shift+T` | Reopen the last closed editor; a closed webview chat panel reopens with its session            |
+| `Pi: Generate Commit Message`        | —                  | Generate an AI-powered Git commit message from staged changes using pi                         |
+| `Pi: Generate Commit Message - Stop` | —                  | Abort an ongoing commit message generation                                                     |
 
 The **Pi: Open** command is also wired to the editor title bar for one-click access.
 
