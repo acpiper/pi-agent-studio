@@ -11,6 +11,15 @@ import type { SessionTracker } from "../sessions.ts";
 import { openChatPanel, syncOpenChatSession } from "../chat/chat-panel.ts";
 import type { ChatTracker } from "../chat/chat-tracker.ts";
 import { filterAndSortSessions } from "./session-search.ts";
+import {
+  createFileStatCache,
+  type FileStatCache,
+  listAllSessionFiles,
+  listSessionFiles,
+  readSessionCwd,
+  readSessionInfo,
+  sessionDirForCwd,
+} from "./session-info-cache.ts";
 import { getSessionsHtml } from "./sessions-sidebar-html.ts";
 import { sessionStatusRegistry } from "../session-status-registry.ts";
 import { t } from "../i18n.ts";
@@ -57,6 +66,11 @@ export function createSessionsViewProvider(
   // Search filtering happens against this in-memory cache so each keystroke
   // doesn't re-read JSONL files from disk.
   const sessionCache = new Map<string, SessionInfo[]>();
+  // Each refresh re-reads only the session files whose mtime or size changed. Active pi
+  // sessions write all the time, so a full re-read on each change keeps a CPU core busy.
+  const infoCache = createFileStatCache(readSessionInfo);
+  const cwdCache = createFileStatCache(readSessionCwd);
+  const sessionsRoot = join(getAgentDir(), "sessions");
   // Last search query per webview lifetime; survives refresh/rename/delete so
   // mutations re-apply the active filter.
   let lastSearchQuery = "";
@@ -129,7 +143,8 @@ export function createSessionsViewProvider(
           return;
         }
         try {
-          const sessions = await SessionManager.list(selectedDirPath);
+          const files = await listSessionFiles(sessionDirForCwd(sessionsRoot, selectedDirPath));
+          const sessions = await infoCache.load(files);
           sessionCache.set(selectedDirPath, sessions);
         } catch (err) {
           console.error("[pi-agent-studio] Sessions view: error fetching sessions:", err);
@@ -140,7 +155,7 @@ export function createSessionsViewProvider(
 
       const refreshAll = async () => {
         try {
-          sessionDirs = await discoverSessionDirs();
+          sessionDirs = await discoverSessionDirs(sessionsRoot, cwdCache);
         } catch (err) {
           console.error("[pi-agent-studio] Sessions view: error discovering dirs:", err);
           sessionDirs = fallbackDirsFromWorkspace();
@@ -170,7 +185,6 @@ export function createSessionsViewProvider(
         });
       });
 
-      const sessionsRoot = join(getAgentDir(), "sessions");
       const watcher = vscode.workspace.createFileSystemWatcher(
         new vscode.RelativePattern(vscode.Uri.file(sessionsRoot), "**/*.jsonl"),
       );
@@ -267,20 +281,23 @@ function serializeSession(s: SessionInfo) {
  * Sessions whose `cwd` falls outside any workspace are ignored — they can still be opened by
  * clicking the session row (that path goes through `openSession()` with `--session <file>`).
  */
-async function discoverSessionDirs(): Promise<SessionDir[]> {
+async function discoverSessionDirs(
+  sessionsRoot: string,
+  cwdCache: FileStatCache<string>,
+): Promise<SessionDir[]> {
   const folders = vscode.workspace.workspaceFolders ?? [];
   if (folders.length === 0) return [];
 
   let cwdCounts: Map<string, number>;
   try {
-    const all = await SessionManager.listAll();
+    const cwds = await cwdCache.load(await listAllSessionFiles(sessionsRoot));
     cwdCounts = new Map<string, number>();
-    for (const s of all) {
-      if (!s.cwd) continue;
-      cwdCounts.set(s.cwd, (cwdCounts.get(s.cwd) ?? 0) + 1);
+    for (const cwd of cwds) {
+      if (!cwd) continue;
+      cwdCounts.set(cwd, (cwdCounts.get(cwd) ?? 0) + 1);
     }
   } catch (err) {
-    console.error("[pi-agent-studio] SessionManager.listAll failed:", err);
+    console.error("[pi-agent-studio] Sessions view: counting sessions per cwd failed:", err);
     cwdCounts = new Map();
   }
 
