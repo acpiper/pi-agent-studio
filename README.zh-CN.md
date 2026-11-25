@@ -63,18 +63,19 @@ ovsx get johnny-zhao/pi-agent-studio
 
 ## 命令
 
-| 命令                                 | 快捷键        | 说明                                                                         |
-| ------------------------------------ | ------------- | ---------------------------------------------------------------------------- |
-| `Pi: Open`                           | `Alt+Shift+P` | 在编辑器旁打开或聚焦 pi 终端                                                 |
-| `Pi: Open in New Window`             | —             | 打开 pi 终端并将其移动到新窗口                                               |
-| `Pi: Open in Sidebar`                | —             | 在 **Pi Chat** 侧边栏视图中打开聊天 UI（启动会话前先显示起始页）             |
-| `Pi: Open Here`                      | —             | 在选中文件夹中打开 pi 终端（通过资源管理器右键菜单）                         |
-| `Pi: Upgrade Pi`                     | —             | 调用 `pi update` 升级 pi（离线时回退到推断的包管理器）                       |
-| `Pi: Open settings.json`             | —             | 在编辑器中打开 `~/.pi/agent/settings.json`（不存在时创建 `{}`）              |
-| `Pi: Open models.json`               | —             | 在编辑器中打开 `~/.pi/agent/models.json`（不存在时创建 `{ providers: {} }`） |
-| `Pi: Open Settings`                  | `Alt+Shift+,` | 打开完整设置面板（聊天面板齿轮按钮与状态栏按钮亦可）                         |
-| `Pi: Generate Commit Message`        | —             | 基于 pi 从暂存区生成 AI Git commit message                                   |
-| `Pi: Generate Commit Message - Stop` | —             | 中止正在进行的 commit message 生成                                           |
+| 命令                                 | 快捷键             | 说明                                                                         |
+| ------------------------------------ | ------------------ | ---------------------------------------------------------------------------- |
+| `Pi: Open`                           | `Alt+Shift+P`      | 在编辑器旁打开或聚焦 pi 终端                                                 |
+| `Pi: Open in New Window`             | —                  | 打开 pi 终端并将其移动到新窗口                                               |
+| `Pi: Open in Sidebar`                | —                  | 在 **Pi Chat** 侧边栏视图中打开聊天 UI（启动会话前先显示起始页）             |
+| `Pi: Open Here`                      | —                  | 在选中文件夹中打开 pi 终端（通过资源管理器右键菜单）                         |
+| `Pi: Upgrade Pi`                     | —                  | 调用 `pi update` 升级 pi（离线时回退到推断的包管理器）                       |
+| `Pi: Open settings.json`             | —                  | 在编辑器中打开 `~/.pi/agent/settings.json`（不存在时创建 `{}`）              |
+| `Pi: Open models.json`               | —                  | 在编辑器中打开 `~/.pi/agent/models.json`（不存在时创建 `{ providers: {} }`） |
+| `Pi: Open Settings`                  | `Alt+Shift+,`      | 打开完整设置面板（聊天面板齿轮按钮与状态栏按钮亦可）                         |
+| `Pi: Reopen Closed Editor or Chat`   | `Cmd/Ctrl+Shift+T` | 重新打开最近关闭的编辑器；已关闭的 webview 聊天面板会连同其会话一起重新打开  |
+| `Pi: Generate Commit Message`        | —                  | 基于 pi 从暂存区生成 AI Git commit message                                   |
+| `Pi: Generate Commit Message - Stop` | —                  | 中止正在进行的 commit message 生成                                           |
 
 **Pi: Open** 命令同时绑定在编辑器标题栏上，可一键打开。
 

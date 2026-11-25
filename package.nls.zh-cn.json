@@ -5,6 +5,7 @@
   "pi.cmd.openModelsJson": "Pi: 打开模型 (JSON)",
   "pi.cmd.openSettings": "Pi: 打开设置",
   "pi.cmd.openInNewWindow": "Pi: 在新窗口中打开",
+  "pi.cmd.reopenClosedEditor": "Pi: 重新打开已关闭的编辑器或聊天",
   "pi.cmd.openInFolder": "Pi: 在此处打开",
   "pi.cmd.openInSidebar": "Pi: 在侧边栏打开",
   "pi.cmd.addSelectionToChat": "将选中内容添加到 Pi 聊天",

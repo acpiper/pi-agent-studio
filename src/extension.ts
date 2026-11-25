@@ -13,6 +13,7 @@ import { createSessionTracker } from "./sessions.ts";
 import { createNewTerminal, isPiTerminal } from "./terminal.ts";
 import { resolveUiMode } from "./ui-mode.ts";
 import { createChatTracker } from "./chat/chat-tracker.ts";
+import { registerReopenClosedEditor } from "./reopen-closed-editor.ts";
 import { disposeRpcTrace } from "./chat/rpc-trace.ts";
 
 let extensionUri: vscode.Uri;
@@ -251,6 +252,10 @@ export async function activate(context: vscode.ExtensionContext) {
       }
       const terminal = await openTerminal();
       terminal?.show();
+    }),
+    registerReopenClosedEditor(async (chat) => {
+      const { openChatPanel } = await import("./chat/chat-panel.ts");
+      await openChatPanel({ extensionUri, bridgeConfig, tracker: chatTracker, ...chat });
     }),
     vscode.commands.registerCommand("pi-agent-studio.openInNewWindow", async () => {
       const mode = resolveUiMode();
