@@ -112,14 +112,14 @@ function placeSelection(node: Node, offset: number): void {
 }
 
 export function getCaretOffset(root: HTMLElement): number {
-  const sel = window.getSelection();
-  if (!sel || !sel.rangeCount) return 0;
-  const range = sel.getRangeAt(0);
-  if (!root.contains(range.startContainer)) return 0;
+  return getSelectionOffsets(root).start;
+}
+
+function offsetOf(root: HTMLElement, node: Node, offset: number): number {
   const pre = document.createRange();
   pre.selectNodeContents(root);
   try {
-    pre.setEnd(range.startContainer, range.startOffset);
+    pre.setEnd(node, offset);
   } catch {
     return 0;
   }
@@ -128,6 +128,16 @@ export function getCaretOffset(root: HTMLElement): number {
 
 function contentLength(root: HTMLElement): number {
   return serializeNode(root).length - (hasPlaceholderBreak(root) ? 1 : 0);
+}
+
+export function getSelectionOffsets(root: HTMLElement): { start: number; end: number } {
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return { start: 0, end: 0 };
+  const range = sel.getRangeAt(0);
+  if (!root.contains(range.startContainer)) return { start: 0, end: 0 };
+  const start = offsetOf(root, range.startContainer, range.startOffset);
+  if (range.collapsed || !root.contains(range.endContainer)) return { start, end: start };
+  return { start, end: offsetOf(root, range.endContainer, range.endOffset) };
 }
 
 export function setCaretOffset(root: HTMLElement, offset: number): void {

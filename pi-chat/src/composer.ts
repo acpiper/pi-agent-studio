@@ -76,6 +76,7 @@ import {
   renderSegments,
   scrollCaretIntoView,
   getCaretOffset,
+  getSelectionOffsets,
   setCaretOffset,
 } from "./input-tokens";
 
@@ -1307,16 +1308,20 @@ inputEl.addEventListener("keydown", function (ev: KeyboardEvent) {
       sendPrompt("steer");
     } else {
       ev.preventDefault();
-      const val = serializeRichInput();
-      const pos = getCaretOffset(inputEl);
-      const newText = val.slice(0, pos) + "\n" + val.slice(pos);
-      inputEl.focus();
-      renderSegments(inputEl, segmentsFromText(newText), pos + 1);
-      autoGrow();
-      updateSendButton();
+      insertTextAtSelection("\n");
     }
   }
 });
+
+function insertTextAtSelection(text: string): void {
+  const val = serializeRichInput();
+  const { start, end } = getSelectionOffsets(inputEl);
+  const newText = val.slice(0, start) + text + val.slice(end);
+  inputEl.focus();
+  renderSegments(inputEl, segmentsFromText(newText), start + text.length);
+  autoGrow();
+  updateSendButton();
+}
 
 acEl.addEventListener("click", function (ev: MouseEvent) {
   let t = ev.target as HTMLElement;
@@ -1356,13 +1361,7 @@ inputEl.addEventListener("paste", function (ev: ClipboardEvent) {
   ev.preventDefault();
   const text = cd.getData("text/plain");
   if (!text) return;
-  const val = serializeRichInput();
-  const pos = getCaretOffset(inputEl);
-  const newText = val.slice(0, pos) + text + val.slice(pos);
-  inputEl.focus();
-  renderSegments(inputEl, segmentsFromText(newText), pos + text.length);
-  autoGrow();
-  updateSendButton();
+  insertTextAtSelection(text);
 });
 
 inputEl.addEventListener("dragover", function (ev: DragEvent) {
