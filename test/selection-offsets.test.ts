@@ -7,7 +7,10 @@ import {
 } from "../pi-chat/src/input-tokens.ts";
 
 // globals.ts looks up chat DOM nodes at import time.
-vi.mock("../pi-chat/src/globals", () => ({ shortenWorkspacePath: (p: string) => p }));
+vi.mock("../pi-chat/src/globals", () => ({
+  shortenWorkspacePath: (p: string) => p,
+  hasPlaceholderBreak: (root: HTMLElement) => root.lastChild?.nodeName === "BR",
+}));
 
 function select(from: [Node, number], to: [Node, number]): void {
   const range = document.createRange();
