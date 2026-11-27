@@ -279,6 +279,7 @@ export async function createChatSession(
 
   function applySessionFile(sessionFile: string | undefined, name?: string): void {
     sessionName = name;
+    host.updateTitle?.(streaming, sessionName);
     if (!sessionFile) {
       needsSessionFile = true;
       void sendSessionInfo();
