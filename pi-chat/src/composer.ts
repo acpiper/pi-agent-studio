@@ -1551,6 +1551,9 @@ window.addEventListener("message", function (e: MessageEvent) {
         updateSessionBtns();
       }
       break;
+    case "panelState":
+      vscode.setState(d.state);
+      break;
     case "models":
       models.length = 0;
       if (d.models) {

@@ -15,6 +15,7 @@ import { resolveUiMode } from "./ui-mode.ts";
 import { createChatTracker } from "./chat/chat-tracker.ts";
 import { registerReopenClosedEditor } from "./reopen-closed-editor.ts";
 import { disposeRpcTrace } from "./chat/rpc-trace.ts";
+import { hasPiChatTab } from "./webview-columns.ts";
 
 let extensionUri: vscode.Uri;
 let bridgeConfig: BridgeConfig | undefined;
@@ -352,8 +353,18 @@ export async function activate(context: vscode.ExtensionContext) {
     ),
   );
 
+  context.subscriptions.push(
+    vscode.window.registerWebviewPanelSerializer("pi-agent-studio.chat", {
+      async deserializeWebviewPanel(panel, state) {
+        const { reviveChatPanel } = await import("./chat/chat-panel.ts");
+        await reviveChatPanel(panel, state, { extensionUri, bridgeConfig, tracker: chatTracker });
+      },
+    }),
+  );
+
   if (bridgeConfig) void sessions.restore(extensionUri, bridgeConfig);
-  if (resolveUiMode() === "webview") {
+  // Chat tabs present at activation were persisted by VS Code and are revived by the serializer.
+  if (resolveUiMode() === "webview" && !hasPiChatTab()) {
     void chatTracker.restore(async (sessionFile, panelId) => {
       const { openChatPanel } = await import("./chat/chat-panel.ts");
       await openChatPanel({
