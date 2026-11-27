@@ -1,28 +1,25 @@
 import * as vscode from "vscode";
+import { CHAT_VIEW_TYPE } from "./chat/chat-panel-state.ts";
 
-const PI_WEBVIEW_VIEW_TYPES = ["pi-agent-studio.chat", "pi-agent-studio.settingsPanel"];
+const PI_WEBVIEW_VIEW_TYPES = [CHAT_VIEW_TYPE, "pi-agent-studio.settingsPanel"];
 
-function isPiTab(tab: vscode.Tab): boolean {
+function isPiTab(tab: vscode.Tab, viewTypes = PI_WEBVIEW_VIEW_TYPES): boolean {
   const input = tab.input;
   return (
     input instanceof vscode.TabInputWebview &&
-    PI_WEBVIEW_VIEW_TYPES.some((viewType) => input.viewType.includes(viewType))
+    viewTypes.some((viewType) => input.viewType.includes(viewType))
   );
 }
 
 export function hasPiChatTab(): boolean {
   return vscode.window.tabGroups.all.some((group) =>
-    group.tabs.some(
-      (tab) =>
-        tab.input instanceof vscode.TabInputWebview &&
-        tab.input.viewType.includes("pi-agent-studio.chat"),
-    ),
+    group.tabs.some((tab) => isPiTab(tab, [CHAT_VIEW_TYPE])),
   );
 }
 
 export function findPiColumn(): vscode.ViewColumn | undefined {
   for (const group of vscode.window.tabGroups.all) {
-    if (group.tabs.some(isPiTab)) return group.viewColumn;
+    if (group.tabs.some((tab) => isPiTab(tab))) return group.viewColumn;
   }
   return undefined;
 }

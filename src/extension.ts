@@ -16,6 +16,7 @@ import { createChatTracker } from "./chat/chat-tracker.ts";
 import { registerReopenClosedEditor } from "./reopen-closed-editor.ts";
 import { disposeRpcTrace } from "./chat/rpc-trace.ts";
 import { hasPiChatTab } from "./webview-columns.ts";
+import { CHAT_VIEW_TYPE } from "./chat/chat-panel-state.ts";
 
 let extensionUri: vscode.Uri;
 let bridgeConfig: BridgeConfig | undefined;
@@ -354,7 +355,7 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.window.registerWebviewPanelSerializer("pi-agent-studio.chat", {
+    vscode.window.registerWebviewPanelSerializer(CHAT_VIEW_TYPE, {
       async deserializeWebviewPanel(panel, state) {
         const { reviveChatPanel } = await import("./chat/chat-panel.ts");
         await reviveChatPanel(panel, state, { extensionUri, bridgeConfig, tracker: chatTracker });

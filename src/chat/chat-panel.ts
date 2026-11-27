@@ -17,6 +17,7 @@ import {
 } from "./chat-session.ts";
 import { sessionStatusRegistry } from "../session-status-registry.ts";
 import { findPiColumn, findUnusedColumn } from "../webview-columns.ts";
+import { CHAT_VIEW_TYPE, isChatPanelState, type ChatPanelState } from "./chat-panel-state.ts";
 import { closedEditors } from "../reopen-closed-editor.ts";
 
 export { type ChatSessionUpdate } from "./chat-session.ts";
@@ -40,29 +41,11 @@ export interface OpenChatPanelOptions {
   panel?: vscode.WebviewPanel;
 }
 
-/** Webview state that VS Code persists so a reloaded panel can be revived. */
-export interface ChatPanelState {
-  panelId: string;
-  sessionFile?: string;
-  cwd?: string;
-}
-
 const activePanels = new Map<string, ChatPanelHandle>();
 const sessionToPanel = new Map<string, string>();
 let lastActivePanelId: string | undefined;
 
-const CHAT_VIEW_TYPE = "pi-agent-studio.chat";
 const CHAT_PANEL_TITLE = "Pi Chat";
-
-export function isChatPanelState(value: unknown): value is ChatPanelState {
-  if (!value || typeof value !== "object") return false;
-  const s = value as Record<string, unknown>;
-  return (
-    typeof s.panelId === "string" &&
-    (s.sessionFile === undefined || typeof s.sessionFile === "string") &&
-    (s.cwd === undefined || typeof s.cwd === "string")
-  );
-}
 
 /** Reattaches a pi chat session to a panel that VS Code restored in place. */
 export async function reviveChatPanel(
