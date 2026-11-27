@@ -506,7 +506,8 @@
     ]
   },
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onWebviewPanel:pi-agent-studio.chat"
   ],
   "icon": "assets/icon.png",
   "badges": [

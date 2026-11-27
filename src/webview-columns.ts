@@ -10,6 +10,16 @@ function isPiTab(tab: vscode.Tab): boolean {
   );
 }
 
+export function hasPiChatTab(): boolean {
+  return vscode.window.tabGroups.all.some((group) =>
+    group.tabs.some(
+      (tab) =>
+        tab.input instanceof vscode.TabInputWebview &&
+        tab.input.viewType.includes("pi-agent-studio.chat"),
+    ),
+  );
+}
+
 export function findPiColumn(): vscode.ViewColumn | undefined {
   for (const group of vscode.window.tabGroups.all) {
     if (group.tabs.some(isPiTab)) return group.viewColumn;

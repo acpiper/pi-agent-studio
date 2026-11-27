@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 import { sep } from "node:path";
 import * as vscode from "vscode";
@@ -35,6 +36,15 @@ export interface OpenChatPanelOptions {
   sessionFile?: string;
   panelId?: string;
   cwd?: string;
+  /** A panel that VS Code restored on reload; used instead of creating one. */
+  panel?: vscode.WebviewPanel;
+}
+
+/** Webview state that VS Code persists so a reloaded panel can be revived. */
+export interface ChatPanelState {
+  panelId: string;
+  sessionFile?: string;
+  cwd?: string;
 }
 
 const activePanels = new Map<string, ChatPanelHandle>();
@@ -43,6 +53,40 @@ let lastActivePanelId: string | undefined;
 
 const CHAT_VIEW_TYPE = "pi-agent-studio.chat";
 const CHAT_PANEL_TITLE = "Pi Chat";
+
+export function isChatPanelState(value: unknown): value is ChatPanelState {
+  if (!value || typeof value !== "object") return false;
+  const s = value as Record<string, unknown>;
+  return (
+    typeof s.panelId === "string" &&
+    (s.sessionFile === undefined || typeof s.sessionFile === "string") &&
+    (s.cwd === undefined || typeof s.cwd === "string")
+  );
+}
+
+/** Reattaches a pi chat session to a panel that VS Code restored in place. */
+export async function reviveChatPanel(
+  panel: vscode.WebviewPanel,
+  state: unknown,
+  opts: Omit<OpenChatPanelOptions, "panel" | "panelId" | "sessionFile" | "cwd">,
+): Promise<void> {
+  const saved = isChatPanelState(state) ? state : undefined;
+  let sessionFile = saved?.sessionFile;
+  if (sessionFile) {
+    try {
+      await access(sessionFile);
+    } catch {
+      sessionFile = undefined;
+    }
+  }
+  await openChatPanel({
+    ...opts,
+    panel,
+    panelId: saved?.panelId,
+    sessionFile,
+    cwd: saved?.cwd,
+  });
+}
 
 export async function openChatPanel(
   opts: OpenChatPanelOptions,
@@ -53,6 +97,10 @@ export async function openChatPanel(
     if (existingId) {
       const handle = activePanels.get(existingId);
       if (handle) {
+        if (opts.panel) {
+          opts.panel.dispose();
+          return handle;
+        }
         handle.panel.reveal(handle.panel.viewColumn ?? vscode.ViewColumn.Active, false);
         return handle;
       }
@@ -60,19 +108,25 @@ export async function openChatPanel(
   }
 
   const piPath = await ensurePiBinary();
-  if (!piPath) return undefined;
+  if (!piPath) {
+    opts.panel?.dispose();
+    return undefined;
+  }
 
   const panelId = opts.panelId ?? randomUUID();
-  const panel = vscode.window.createWebviewPanel(
-    CHAT_VIEW_TYPE,
-    CHAT_PANEL_TITLE,
-    findPiColumn() ?? findUnusedColumn() ?? vscode.ViewColumn.Beside,
-    {
-      enableScripts: true,
-      retainContextWhenHidden: true,
-      enableFindWidget: true,
-    },
-  );
+  const panel =
+    opts.panel ??
+    vscode.window.createWebviewPanel(
+      CHAT_VIEW_TYPE,
+      CHAT_PANEL_TITLE,
+      findPiColumn() ?? findUnusedColumn() ?? vscode.ViewColumn.Beside,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+        enableFindWidget: true,
+      },
+    );
+  if (opts.panel) panel.webview.options = { enableScripts: true };
   panel.iconPath = {
     light: vscode.Uri.joinPath(opts.extensionUri, "assets", "logo-light.svg"),
     dark: vscode.Uri.joinPath(opts.extensionUri, "assets", "logo.svg"),
@@ -93,6 +147,12 @@ export async function openChatPanel(
 
   let disposed = false;
 
+  const postPanelState = (sessionFile: string | undefined) => {
+    if (disposed) return;
+    const state: ChatPanelState = { panelId, sessionFile, cwd: opts.cwd };
+    panel.webview.postMessage({ type: "panelState", state });
+  };
+  postPanelState(opts.sessionFile);
   const langSub = vscode.workspace.onDidChangeConfiguration((e) => {
     if (e.affectsConfiguration("pi-agent-studio.chatSendShortcut")) {
       const cfg = vscode.workspace.getConfiguration("pi-agent-studio");
@@ -158,6 +218,7 @@ export async function openChatPanel(
       if (sessionFile) {
         sessionToPanel.set(sessionFile, panelId);
         opts.tracker.update(panelId, sessionFile);
+        postPanelState(sessionFile);
         sessionStatusRegistry.upsert({
           sessionFile,
           status: session?.streaming ? "running" : "idle",
