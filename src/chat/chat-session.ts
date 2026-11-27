@@ -1065,6 +1065,8 @@ export async function createChatSession(
             updateStreamingState(true);
           } else if (event.type === "agent_settled") {
             updateStreamingState(false);
+          } else if (event.type === "session_info_changed") {
+            sync({ rename: typeof event.name === "string" ? event.name : "" });
           }
           host.postMessage({ type: "event", event });
           if (event.type === "agent_settled") {
